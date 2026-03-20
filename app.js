@@ -28,32 +28,57 @@ let selectedSeatId = null;
 // SUBSYSTEM 4: DATABASE SYNC MODULE
 // ==========================================
 
+// ==========================================
+// SUBSYSTEM 4: DATABASE SYNC MODULE (UPGRADED)
+// ==========================================
+
 async function initSystem() {
     console.log("Connecting to Firestore...");
     const seatsCollection = collection(db, "seats");
     const querySnapshot = await getDocs(seatsCollection);
 
-    if (querySnapshot.empty) {
-        console.log("Database empty. Generating 30 default seats...");
+    // FIX: Check if we have exactly 30 seats. If we have 3, 12, or 0... rebuild!
+    if (querySnapshot.size !== TOTAL_SEATS) {
+        console.log("Database incomplete or empty. Generating exactly 30 default seats...");
+        
+        seats = []; // Clear our local memory
+        
+        // 1. Build the 30 seats in local memory instantly
         for (let i = 1; i <= TOTAL_SEATS; i++) {
-            const newSeat = {
+            seats.push({
                 id: i,
                 status: "Empty",
                 customerName: "",
                 ticketType: "None"
-            };
-            seats.push(newSeat);
-            // setDoc creates the document if it doesn't exist
-            await setDoc(doc(db, "seats", i.toString()), newSeat);
+            });
         }
+
+        // 2. Draw the grid IMMEDIATELY so the user isn't staring at a blank screen
+        renderGrid();
+        updateDashboard();
+
+        // 3. Save all 30 to the cloud at the exact same time (using Promise.all for speed)
+        const savePromises = seats.map(seat => {
+            return setDoc(doc(db, "seats", seat.id.toString()), seat);
+        });
+        
+        await Promise.all(savePromises);
+        console.log("All 30 seats successfully secured in the cloud!");
+
     } else {
-        console.log("Data found! Loading seats from cloud...");
+        console.log("Perfect 30 seats found! Loading from cloud...");
         seats = [];
         querySnapshot.forEach((docSnap) => {
             seats.push(docSnap.data());
         });
+        // Sort them just in case Firebase hands them back out of order
         seats.sort((a, b) => a.id - b.id);
+        
+        // Draw the grid now that we have the data
+        renderGrid();
+        updateDashboard();
     }
+}
 
     renderGrid();
     updateDashboard();
