@@ -25,10 +25,6 @@ const PRICE_CHILD = 8.00;
 let selectedSeatId = null;
 
 // ==========================================
-// SUBSYSTEM 4: DATABASE SYNC MODULE
-// ==========================================
-
-// ==========================================
 // SUBSYSTEM 4: DATABASE SYNC MODULE (UPGRADED)
 // ==========================================
 
@@ -78,11 +74,7 @@ async function initSystem() {
         renderGrid();
         updateDashboard();
     }
-}
-
-    renderGrid();
-    updateDashboard();
-}
+} // <--- The syntax error was here! It is now fixed.
 
 // ==========================================
 // SUBSYSTEM 1: UI GRID RENDERER
