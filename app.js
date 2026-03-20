@@ -2,22 +2,25 @@
 // SEATSYNC: CORE STATE & FIREBASE SETUP
 // ==========================================
 
+// 1. Import Firebase v10 Modular functions directly from Google's CDN
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
-import { getFirestore, collection, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
 
-// Your exact Firebase configuration
+// !!! DANIEL: PASTE YOUR FIREBASE CONFIG OBJECT HERE !!!
 const firebaseConfig = {
-  apiKey: "AIzaSyCx7R7HlVl-lRdwYbNIvT3lir7K5zcCMBs",
-  authDomain: "seatsync2026-3c5d6.firebaseapp.com",
-  projectId: "seatsync2026-3c5d6",
-  storageBucket: "seatsync2026-3c5d6.firebasestorage.app",
-  messagingSenderId: "1062306157823",
-  appId: "1:1062306157823:web:5d71900d44305683c468ca"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
 
+// Initialize Firebase and Firestore
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
+// Application State
 let seats = [];
 const TOTAL_SEATS = 30;
 const PRICE_ADULT = 15.00;
@@ -25,16 +28,20 @@ const PRICE_CHILD = 8.00;
 let selectedSeatId = null;
 
 // ==========================================
-// SUBSYSTEM 4: DATABASE SYNC MODULE
+// SUBSYSTEM 4: DATABASE SYNC MODULE (LOADING)
 // ==========================================
 
+// Notice the "async" keyword. This tells the browser this function takes time.
 async function initSystem() {
     console.log("Connecting to Firestore...");
     const seatsCollection = collection(db, "seats");
+    
+    // The "await" keyword pauses the code here until Firebase responds
     const querySnapshot = await getDocs(seatsCollection);
 
     if (querySnapshot.empty) {
         console.log("Database empty. Generating 30 default seats...");
+        // If the database is completely empty, build the 30 seats and save them to the cloud
         for (let i = 1; i <= TOTAL_SEATS; i++) {
             const newSeat = {
                 id: i,
@@ -43,18 +50,21 @@ async function initSystem() {
                 ticketType: "None"
             };
             seats.push(newSeat);
-            // setDoc creates the document if it doesn't exist
+            // Save each new seat as its own document in the "seats" collection
             await setDoc(doc(db, "seats", i.toString()), newSeat);
         }
     } else {
         console.log("Data found! Loading seats from cloud...");
+        // If data exists, grab it and put it into our local array
         seats = [];
         querySnapshot.forEach((docSnap) => {
             seats.push(docSnap.data());
         });
+        // Ensure they remain in numeric order 1 to 30
         seats.sort((a, b) => a.id - b.id);
     }
 
+    // Now that we have the data, draw the screen
     renderGrid();
     updateDashboard();
 }
@@ -96,11 +106,12 @@ function selectSeat(id) {
 }
 
 // ==========================================
-// SUBSYSTEM 2: BOOKING & VALIDATION ENGINE
+// SUBSYSTEM 2 & 3: BOOKING & DASHBOARD
 // ==========================================
+// Note: These buttons still only update the LOCAL memory for now. 
+// We will wire them up to save to Firebase in Step 4.
 
-// Added 'async' here because saving to the database takes time
-document.getElementById('btn-book').addEventListener('click', async () => {
+document.getElementById('btn-book').addEventListener('click', () => {
     if (selectedSeatId === null) {
         alert("Validation Error: Please click on an empty seat from the grid first.");
         return; 
@@ -118,19 +129,10 @@ document.getElementById('btn-book').addEventListener('click', async () => {
         return;
     }
 
-    // 1. Update the local memory first so the UI feels fast
     const seatIndex = seats.findIndex(s => s.id === selectedSeatId);
     seats[seatIndex].status = "Booked";
     seats[seatIndex].customerName = nameInput;
     seats[seatIndex].ticketType = typeInput;
-
-    // 2. Push the exact same update to the cloud database
-    const seatRef = doc(db, "seats", selectedSeatId.toString());
-    await updateDoc(seatRef, {
-        status: "Booked",
-        customerName: nameInput,
-        ticketType: typeInput
-    });
 
     selectedSeatId = null;
     document.getElementById('display-selected-seat').innerText = "None";
@@ -140,10 +142,6 @@ document.getElementById('btn-book').addEventListener('click', async () => {
     renderGrid();
     updateDashboard();
 });
-
-// ==========================================
-// SUBSYSTEM 3: FINANCIAL CALCULATOR & WIPE
-// ==========================================
 
 function updateDashboard() {
     let adultCount = 0;
@@ -161,42 +159,21 @@ function updateDashboard() {
     document.getElementById('stat-revenue').innerText = `$${totalRevenue.toFixed(2)}`;
 }
 
-// Added 'async' here as well to handle the bulk cloud deletions
-document.getElementById('btn-clear-all').addEventListener('click', async () => {
+document.getElementById('btn-clear-all').addEventListener('click', () => {
     const isSure = confirm("WARNING: Are you absolutely sure you want to delete ALL bookings? This cannot be undone.");
-    
     if (isSure) {
-        // Change the button text so the user knows it is working
-        const btnClear = document.getElementById('btn-clear-all');
-        btnClear.innerText = "Clearing Database...";
-        btnClear.disabled = true;
-
-        // Loop through all 30 seats to wipe them locally and in the cloud
-        for (let i = 0; i < seats.length; i++) {
-            seats[i].status = "Empty";
-            seats[i].customerName = "";
-            seats[i].ticketType = "None";
-
-            const seatRef = doc(db, "seats", seats[i].id.toString());
-            await updateDoc(seatRef, {
-                status: "Empty",
-                customerName: "",
-                ticketType: "None"
-            });
-        }
-        
+        seats.forEach(seat => {
+            seat.status = "Empty";
+            seat.customerName = "";
+            seat.ticketType = "None";
+        });
         selectedSeatId = null;
         document.getElementById('display-selected-seat').innerText = "None";
-        
         renderGrid();
         updateDashboard();
-        
-        // Restore the button
-        btnClear.innerText = "Clear All Bookings";
-        btnClear.disabled = false;
-        
-        alert("All bookings have been wiped from the cloud.");
+        alert("All bookings have been cleared locally.");
     }
 });
 
+// Boot up the system!
 initSystem();
