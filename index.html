@@ -5,62 +5,343 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SeatSync - Teatro don Bosco</title>
     <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-200 text-gray-800 font-sans p-4 md:p-8 min-h-screen flex items-center justify-center">
-
-    <div class="max-w-5xl w-full mx-auto bg-white p-6 md:p-8 rounded-xl shadow-xl flex flex-col md:flex-row gap-8">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
         
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 8px 32px 0 rgba(31, 38, 135, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 
+                0 4px 24px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .glass-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.35);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        }
+        
+        .glass-input {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: #1f2937;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-input:focus {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: rgba(255, 255, 255, 0.8);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+        
+        .glass-input::placeholder {
+            color: rgba(31, 41, 55, 0.5);
+        }
+        
+        .seat-btn {
+            background: rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .seat-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.5s;
+        }
+        
+        .seat-btn:hover::before {
+            left: 100%;
+        }
+        
+        .seat-btn:hover {
+            transform: scale(1.05);
+            background: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+        
+        .seat-empty {
+            background: rgba(16, 185, 129, 0.2);
+            border-color: rgba(16, 185, 129, 0.5);
+            color: #065f46;
+        }
+        
+        .seat-empty:hover {
+            background: rgba(16, 185, 129, 0.4);
+        }
+        
+        .seat-booked {
+            background: rgba(156, 163, 175, 0.3);
+            border-color: rgba(156, 163, 175, 0.4);
+            color: #4b5563;
+            cursor: not-allowed;
+        }
+        
+        .seat-selected {
+            background: rgba(59, 130, 246, 0.4) !important;
+            border-color: rgba(59, 130, 246, 0.8) !important;
+            color: #1e40af !important;
+            box-shadow: 
+                0 0 20px rgba(59, 130, 246, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+            50% { box-shadow: 0 0 30px rgba(59, 130, 246, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.6); }
+        }
+        
+        .glass-button-primary {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.8), rgba(147, 51, 234, 0.8));
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .glass-button-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        
+        .glass-button-primary:hover::before {
+            left: 100%;
+        }
+        
+        .glass-button-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(59, 130, 246, 0.4);
+        }
+        
+        .glass-button-danger {
+            background: rgba(239, 68, 68, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            color: #dc2626;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .glass-button-danger:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+        }
+        
+        .floating-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+            z-index: -1;
+            animation: float 20s infinite ease-in-out;
+        }
+        
+        .orb-1 {
+            width: 400px;
+            height: 400px;
+            background: rgba(255, 255, 255, 0.3);
+            top: -100px;
+            left: -100px;
+            animation-delay: 0s;
+        }
+        
+        .orb-2 {
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 200, 200, 0.3);
+            bottom: -50px;
+            right: -50px;
+            animation-delay: -5s;
+        }
+        
+        .orb-3 {
+            width: 250px;
+            height: 250px;
+            background: rgba(200, 255, 255, 0.3);
+            top: 50%;
+            left: 50%;
+            animation-delay: -10s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(30px, -30px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+        }
+        
+        .shimmer-text {
+            background: linear-gradient(90deg, #1f2937 0%, #4b5563 50%, #1f2937 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 3s linear infinite;
+        }
+        
+        @keyframes shimmer {
+            to { background-position: 200% center; }
+        }
+        
+        .stat-value {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .revenue-highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2));
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            color: #065f46;
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center relative overflow-x-hidden">
+
+    <!-- Floating background orbs for depth -->
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+
+    <div class="glass-panel max-w-6xl w-full mx-auto p-6 md:p-10 rounded-3xl flex flex-col md:flex-row gap-8 relative z-10">
+        
+        <!-- Left Column: Seating Grid -->
         <div class="flex-1">
-            <h2 class="text-2xl font-extrabold text-gray-900 mb-6">Teatro don Bosco - Seating</h2>
+            <div class="mb-8">
+                <h1 class="text-3xl md:text-4xl font-bold shimmer-text mb-2">Teatro don Bosco</h1>
+                <p class="text-gray-700 font-medium opacity-80">Select your seat from the glass grid below</p>
+            </div>
             
-            <div id="seat-grid" class="grid grid-cols-5 gap-3">
+            <div id="seat-grid" class="grid grid-cols-5 gap-4 p-4 glass-card rounded-2xl">
+                <!-- Seats generated by JS -->
+            </div>
+            
+            <div class="mt-6 flex gap-4 text-sm font-medium text-gray-700">
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded seat-empty border"></div>
+                    <span>Available</span>
                 </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded seat-booked border"></div>
+                    <span>Booked</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-4 h-4 rounded seat-selected border"></div>
+                    <span>Selected</span>
+                </div>
+            </div>
         </div>
 
-        <div class="w-full md:w-1/3 flex flex-col gap-6">
+        <!-- Right Column: Booking & Stats -->
+        <div class="w-full md:w-2/5 flex flex-col gap-6">
             
-            <div class="bg-blue-50 p-6 rounded-xl border border-blue-100 shadow-sm">
-                <h3 class="text-xl font-bold mb-2">Book a Ticket</h3>
-                <p class="mb-4 text-sm text-gray-600">Selected Seat: <span id="display-selected-seat" class="font-bold text-blue-600 text-lg border-b-2 border-blue-600">None</span></p>
+            <!-- Booking Form -->
+            <div class="glass-card p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Book a Ticket</h3>
+                <div class="h-0.5 w-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded mb-4"></div>
+                
+                <div class="mb-4 p-3 glass-input rounded-xl">
+                    <span class="text-sm text-gray-600 font-medium">Selected Seat</span>
+                    <div id="display-selected-seat" class="text-2xl font-bold text-blue-700 mt-1">None</div>
+                </div>
                 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-semibold mb-1 text-gray-700">Customer Name</label>
-                        <input type="text" id="input-customer-name" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500" placeholder="e.g., Jane Doe">
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Customer Name</label>
+                        <input type="text" id="input-customer-name" 
+                               class="glass-input w-full p-3 rounded-xl" 
+                               placeholder="e.g., Jane Doe">
                     </div>
                     
                     <div>
-                        <label class="block text-sm font-semibold mb-1 text-gray-700">Ticket Type</label>
-                        <select id="input-ticket-type" class="w-full p-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
-                            <option value="">-- Select Type --</option>
+                        <label class="block text-sm font-semibold mb-2 text-gray-700">Ticket Type</label>
+                        <select id="input-ticket-type" class="glass-input w-full p-3 rounded-xl cursor-pointer">
+                            <option value="">Select Type</option>
                             <option value="A">Adult ($15.00)</option>
                             <option value="C">Child ($8.00)</option>
                         </select>
                     </div>
                     
-                    <button id="btn-book" class="w-full bg-blue-600 text-white font-bold py-3 rounded hover:bg-blue-700 transition shadow-md">Confirm Booking</button>
+                    <button id="btn-book" class="glass-button-primary w-full py-4 rounded-xl text-lg shadow-lg">
+                        Confirm Booking
+                    </button>
                 </div>
             </div>
 
-            <div class="bg-gray-50 p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h3 class="text-xl font-bold mb-4">Revenue Report</h3>
+            <!-- Revenue Dashboard -->
+            <div class="glass-card p-6 rounded-2xl flex-1">
+                <h3 class="text-xl font-bold text-gray-800 mb-1">Revenue Report</h3>
+                <div class="h-0.5 w-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded mb-6"></div>
                 
-                <ul class="space-y-3 mb-6 text-gray-700">
-                    <li class="flex justify-between items-center">
-                        <span>Adult Tickets (A):</span> 
-                        <span id="stat-adults" class="font-bold bg-white px-3 py-1 rounded border">0</span>
-                    </li>
-                    <li class="flex justify-between items-center">
-                        <span>Child Tickets (C):</span> 
-                        <span id="stat-children" class="font-bold bg-white px-3 py-1 rounded border">0</span>
-                    </li>
-                    <li class="flex justify-between items-center text-xl mt-4 pt-4 border-t border-gray-300">
-                        <strong>Total:</strong> 
-                        <strong id="stat-revenue" class="text-green-600">$0.00</strong>
-                    </li>
-                </ul>
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center p-3 glass-input rounded-xl">
+                        <span class="text-gray-700 font-medium">Adult Tickets</span>
+                        <span id="stat-adults" class="stat-value px-4 py-2 rounded-lg font-bold text-gray-800">0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-3 glass-input rounded-xl">
+                        <span class="text-gray-700 font-medium">Child Tickets</span>
+                        <span id="stat-children" class="stat-value px-4 py-2 rounded-lg font-bold text-gray-800">0</span>
+                    </div>
+                    
+                    <div class="flex justify-between items-center p-4 revenue-highlight rounded-xl mt-4">
+                        <span class="font-bold text-lg">Total Revenue</span>
+                        <span id="stat-revenue" class="text-2xl font-bold">$0.00</span>
+                    </div>
+                </div>
                 
-                <button id="btn-clear-all" class="w-full border-2 border-red-500 text-red-600 font-bold py-2 rounded hover:bg-red-50 hover:text-red-700 transition">
+                <button id="btn-clear-all" class="glass-button-danger w-full py-3 rounded-xl mt-6">
                     Clear All Bookings
                 </button>
             </div>
@@ -68,6 +349,266 @@
         </div>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <script>
+        // ==========================================
+        // SEATSYNC: CORE STATE & FIREBASE SETUP
+        // ==========================================
+
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.10.0/firebase-firestore.js";
+
+        // Your exact Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyCx7R7HlVl-lRdwYbNIvT3lir7K5zcCMBs",
+          authDomain: "seatsync2026-3c5d6.firebaseapp.com",
+          projectId: "seatsync2026-3c5d6",
+          storageBucket: "seatsync2026-3c5d6.firebasestorage.app",
+          messagingSenderId: "1062306157823",
+          appId: "1:1062306157823:web:5d71900d44305683c468ca"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let seats = [];
+        const TOTAL_SEATS = 30;
+        const PRICE_ADULT = 15.00;
+        const PRICE_CHILD = 8.00;
+        let selectedSeatId = null;
+
+        // ==========================================
+        // SUBSYSTEM 4: DATABASE SYNC MODULE (UPGRADED)
+        // ==========================================
+
+        async function initSystem() {
+            console.log("Connecting to Firestore...");
+            try {
+                const seatsCollection = collection(db, "seats");
+                const querySnapshot = await getDocs(seatsCollection);
+
+                // FIX: Check if we have exactly 30 seats. If we have 3, 12, or 0... rebuild!
+                if (querySnapshot.size !== TOTAL_SEATS) {
+                    console.log("Database incomplete or empty. Generating exactly 30 default seats...");
+                    
+                    seats = []; // Clear our local memory
+                    
+                    // 1. Build the 30 seats in local memory instantly
+                    for (let i = 1; i <= TOTAL_SEATS; i++) {
+                        seats.push({
+                            id: i,
+                            status: "Empty",
+                            customerName: "",
+                            ticketType: "None"
+                        });
+                    }
+
+                    // 2. Draw the grid IMMEDIATELY so the user isn't staring at a blank screen
+                    renderGrid();
+                    updateDashboard();
+
+                    // 3. Save all 30 to the cloud at the exact same time (using Promise.all for speed)
+                    const savePromises = seats.map(seat => {
+                        return setDoc(doc(db, "seats", seat.id.toString()), seat);
+                    });
+                    
+                    await Promise.all(savePromises);
+                    console.log("All 30 seats successfully secured in the cloud!");
+
+                } else {
+                    console.log("Perfect 30 seats found! Loading from cloud...");
+                    seats = [];
+                    querySnapshot.forEach((docSnap) => {
+                        seats.push(docSnap.data());
+                    });
+                    // Sort them just in case Firebase hands them back out of order
+                    seats.sort((a, b) => a.id - b.id);
+                    
+                    // Draw the grid now that we have the data
+                    renderGrid();
+                    updateDashboard();
+                }
+            } catch (error) {
+                console.error("Error initializing system:", error);
+                // Fallback: create local seats if Firebase fails
+                seats = [];
+                for (let i = 1; i <= TOTAL_SEATS; i++) {
+                    seats.push({
+                        id: i,
+                        status: "Empty",
+                        customerName: "",
+                        ticketType: "None"
+                    });
+                }
+                renderGrid();
+                updateDashboard();
+            }
+        }
+
+        // ==========================================
+        // SUBSYSTEM 1: UI GRID RENDERER
+        // ==========================================
+
+        function renderGrid() {
+            const gridContainer = document.getElementById('seat-grid');
+            gridContainer.innerHTML = ''; 
+
+            seats.forEach(seat => {
+                const btn = document.createElement('button');
+                btn.className = "seat-btn p-4 rounded-xl font-bold flex flex-col items-center justify-center h-20 text-lg";
+                
+                if (seat.status === "Empty") {
+                    btn.classList.add("seat-empty");
+                    btn.innerHTML = `<span class="text-2xl mb-1">${seat.id}</span><span class="text-xs opacity-70">Available</span>`;
+                    btn.onclick = () => selectSeat(seat.id);
+                } else {
+                    btn.classList.add("seat-booked");
+                    btn.innerHTML = `<span class="text-2xl mb-1">${seat.id}</span><span class="text-xs opacity-70">${seat.ticketType === 'A' ? 'Adult' : 'Child'}</span>`;
+                }
+
+                if (seat.id === selectedSeatId) {
+                    btn.classList.remove("seat-empty");
+                    btn.classList.add("seat-selected");
+                    btn.innerHTML = `<span class="text-2xl mb-1">${seat.id}</span><span class="text-xs">Selected</span>`;
+                }
+
+                gridContainer.appendChild(btn);
+            });
+        }
+
+        function selectSeat(id) {
+            selectedSeatId = id;
+            const display = document.getElementById('display-selected-seat');
+            display.textContent = `Seat ${id}`;
+            display.classList.add('text-blue-700');
+            renderGrid(); 
+        }
+
+        // ==========================================
+        // SUBSYSTEM 2: BOOKING & VALIDATION ENGINE
+        // ==========================================
+
+        document.getElementById('btn-book').addEventListener('click', async () => {
+            if (selectedSeatId === null) {
+                showNotification("Please select an empty seat first", "error");
+                return; 
+            }
+
+            const nameInput = document.getElementById('input-customer-name').value.trim();
+            const typeInput = document.getElementById('input-ticket-type').value;
+
+            if (nameInput === "") {
+                showNotification("Customer Name cannot be blank", "error");
+                return;
+            }
+            if (typeInput !== "A" && typeInput !== "C") {
+                showNotification("Please select a valid Ticket Type", "error");
+                return;
+            }
+
+            // 1. Update the local memory first so the UI feels fast
+            const seatIndex = seats.findIndex(s => s.id === selectedSeatId);
+            seats[seatIndex].status = "Booked";
+            seats[seatIndex].customerName = nameInput;
+            seats[seatIndex].ticketType = typeInput;
+
+            // 2. Push the exact same update to the cloud database
+            try {
+                const seatRef = doc(db, "seats", selectedSeatId.toString());
+                await updateDoc(seatRef, {
+                    status: "Booked",
+                    customerName: nameInput,
+                    ticketType: typeInput
+                });
+
+                selectedSeatId = null;
+                document.getElementById('display-selected-seat').innerText = "None";
+                document.getElementById('input-customer-name').value = "";
+                document.getElementById('input-ticket-type').value = "";
+
+                renderGrid();
+                updateDashboard();
+                showNotification("Booking confirmed successfully!", "success");
+            } catch (error) {
+                console.error("Error booking seat:", error);
+                showNotification("Error saving booking. Please try again.", "error");
+            }
+        });
+
+        // ==========================================
+        // SUBSYSTEM 3: FINANCIAL CALCULATOR & WIPE
+        // ==========================================
+
+        function updateDashboard() {
+            let adultCount = 0;
+            let childCount = 0;
+
+            seats.forEach(seat => {
+                if (seat.ticketType === "A") adultCount++;
+                if (seat.ticketType === "C") childCount++;
+            });
+
+            const totalRevenue = (adultCount * PRICE_ADULT) + (childCount * PRICE_CHILD);
+
+            document.getElementById('stat-adults').innerText = adultCount;
+            document.getElementById('stat-children').innerText = childCount;
+            document.getElementById('stat-revenue').innerText = `$${totalRevenue.toFixed(2)}`;
+        }
+
+        document.getElementById('btn-clear-all').addEventListener('click', async () => {
+            const isSure = confirm("WARNING: Are you absolutely sure you want to delete ALL bookings? This cannot be undone.");
+            
+            if (isSure) {
+                const btnClear = document.getElementById('btn-clear-all');
+                btnClear.innerText = "Clearing...";
+                btnClear.disabled = true;
+
+                try {
+                    // Loop through all 30 seats to wipe them locally and in the cloud
+                    for (let i = 0; i < seats.length; i++) {
+                        seats[i].status = "Empty";
+                        seats[i].customerName = "";
+                        seats[i].ticketType = "None";
+
+                        const seatRef = doc(db, "seats", seats[i].id.toString());
+                        await updateDoc(seatRef, {
+                            status: "Empty",
+                            customerName: "",
+                            ticketType: "None"
+                        });
+                    }
+                    
+                    selectedSeatId = null;
+                    document.getElementById('display-selected-seat').innerText = "None";
+                    
+                    renderGrid();
+                    updateDashboard();
+                    showNotification("All bookings cleared", "success");
+                } catch (error) {
+                    console.error("Error clearing bookings:", error);
+                    showNotification("Error clearing bookings", "error");
+                } finally {
+                    btnClear.innerText = "Clear All Bookings";
+                    btnClear.disabled = false;
+                }
+            }
+        });
+
+        // Notification system
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 p-4 rounded-xl glass-card z-50 font-semibold transform transition-all duration-300 translate-x-full ${type === 'error' ? 'text-red-700 border-red-300' : 'text-green-700 border-green-300'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => notification.classList.remove('translate-x-full'), 100);
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Boot up the system!
+        initSystem();
+    </script>
 </body>
 </html>
